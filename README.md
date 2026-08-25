@@ -2,7 +2,7 @@
 
 Official PyTorch implementation of **Polar Subarea-Aware Fusion Net for Posterior Eyeball Shape Reconstruction**.
 
-This compact release supports the POSDiag 25%-FOV configuration. PSAFNet takes a local RUV Ocular Shape Map (OSM), an anatomical template, and a subarea index as input, and reconstructs the complete R-channel OSM. The released model uses a ResNet-50/ViT hybrid backbone and a 24 x 22 subarea embedding grid.
+This compact release supports the POSDiag 25%-FOV configuration. PSAFNet takes a local OCT/iOCT scan and an anatomical template as input to reconstruct the complete and high-fidelity retinal morphology. The released model uses a siamese hybrid backbone with a fully 2D multi-channel representation, called Ocular Shape Map (OSM), therefore converting this 3D reconstruction task into a dense completion task.
 
 Paper: [IEEE Transactions on Medical Imaging](https://doi.org/10.1109/TMI.2025.3642381)
 
@@ -22,7 +22,6 @@ Activate the virtual environment before installation if required by your operati
 Download `psafnet_posdiag_fov25_r.pth` from the repository's [GitHub Releases](https://github.com/HKUZJ77/PSAFNet/releases).
 
 - Size: 952,888,084 bytes (0.887 GiB)
-- SHA256: `A990599DEBB4DF0D62C35231D19EDD4D876EFC2059A2EEF728873A3B32DA4BA4`
 
 ## Data preparation
 
@@ -48,7 +47,7 @@ Each split line contains:
 <input_filename> <case_id> <region_id>
 ```
 
-The source NPY arrays are channel-first float32 OSMs with shape `(6, 300, 256)` and values normalized to approximately `[0, 1]`. Channels 3--5 form the RUV input, channel 3 is the complete R-channel target, and `region_id` is an integer from 0 to 4. The data loader resizes arrays to `384 x 352`.
+The source NPY arrays are channel-first float32 OSMs with shape `(6, H, W)` and values normalized to approximately `[0, 1]`. Channels 3--5 form the RUV input, channel 3 is the complete R-channel target, and `region_id` is an integer from 0 to 4 or 0 to 24 according to SFEM congfiguration. The data loader resizes arrays to `384 x 352`.
 
 ## Training
 
@@ -64,7 +63,7 @@ Training uses `Smooth L1 + 0.1 * perceptual loss + 0.1 * histogram EMD`. Batch s
 python test.py --data-root /path/to/POSDiag --weights /path/to/psafnet_posdiag_fov25_r.pth --split test --output-dir results/posdiag_fov25
 ```
 
-Predictions are saved as float32 NPY files. The script also reports mean Smooth L1 loss against the available ground truth.
+Predictions are saved as float32 NPY files. The script also reports mean loss against the available ground truth.
 
 ## Citation
 
